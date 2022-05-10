@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.9/vue.js"></script>
+        
+    </head>
+    <body>
+        <div id="logout_section" > 
+            <form id="logout_form" action="/index.html">
+                <button id="logout_button" type="submit" class="btn btn-primary">Logout</button>
+            </form>    
+        </div>
+        <div id="change_team_section" > 
+            <form id="teamchange_form" Onclick="setUrl(); return false;">
+                <button id="teamchange_button" type="submit" class="btn btn-primary">Choose a new team</button>
+            </form>    
+        </div>
+      
+        <div id="test" style="text-align: center; margin: auto; position: relative; top: 20;">
+            <div v-text>
+                <p style="font-size: 48; font-weight: bold;"> {{ team.team }}</p>
+                <p>Team Batting Average: {{ team.stats.batting_avg_for }}</p>
+                <p>Team OBP: {{ team.stats.obp_for }}</p>
+                <p>Team SLG: {{ team.stats.slg_for }}</p>
+                <p>Team OPS: {{ team.stats.ops_for }}</p>
+                <p>Runs for: {{ team.stats.runs_for }}</p>
+                <p>Team ERA: {{ team.stats.era_pitching }}</p>
+                <p>Pitching Strikeouts: {{ team.stats.strikeouts_pitching }}</p>
+                <p>Pitching Walks: {{ team.stats.walks_pitching }}</p>
+                <p>Runs Against: {{ team.stats.runs_against }}</p>
+            </div>
+        </div>
+        <script>
+            const parameters = new URLSearchParams(window.location.search);
+            console.log(parameters.get('username'));
+            new Vue({
+                el: '#test',
+                data: {
+                    team: ""
+                }, 
+                mounted(){
+                    fetch(`/user/${parameters.get('username')}`)
+                    .then( r => r.json())
+                    .then(r => (this.team = r));
+                    console.log(this.team);
+                    console.log('mounted');
+                }
+            });
+            function setUrl() {
+                window.location.href = `/select_team.html?username=${parameters.get('username')}`;
+            };
+        </script>
+        
+    </body>
+</html>
