@@ -199,7 +199,7 @@ class Predictor{
         return result;
     }
     async calcRegr(data){
-        var cof = await this.getCoeff('./stats/coef.csv');
+        var cof = await this.getCoeff('./coef.csv');
         var hitting_vals = Object.values(data.stats.hitting);
         var hitting_cof = Object.values(cof).slice(0,hitting_vals.length)
         var hitting_reg = this.dotProduct(hitting_vals,hitting_cof)

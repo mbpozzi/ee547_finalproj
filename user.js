@@ -13,7 +13,7 @@ const app = express();
 const BodyParser = require('body-parser');
 const { url } = require('inspector');
 const urlEncodedBodyParser = BodyParser.urlencoded({extended: false});
-const { MlbApi } = require('/home/user/final_project/mlb_api.js');
+const { MlbApi } = require('./mlb_api.js');
 
 app.use(express.static('public'));
 
@@ -38,8 +38,10 @@ catch(err)
 }
 
 
+const mlb = new MlbApi();
 let mongoDb;
 let teamNames;
+var probs;
 ( async () =>
 {
     try 
@@ -54,6 +56,13 @@ let teamNames;
             const MONGO_DB = details.db;
             const mongoConnect = await MongoClient.connect(URI);
             mongoDb = mongoConnect.db(MONGO_DB);
+            
+            (async ()=> {
+                await mlb.getWorldSeriesPerc((err,data) => {
+                    probs = data
+                    console.log(probs)
+                });
+            })();
             
             // let usernameIndexed = mongoDb.collection(USER_COLLECTION).createIndex({"username": "name"});
             app.listen(PORT);
@@ -165,7 +174,7 @@ class decorator
 }
 const v = new validator();
 const d = new decorator();
-const mlb = new MlbApi();
+//const mlb = new MlbApi();
 
 let teamsArray = [];
 mlb.getTeamsStats('2022', (err, data) =>
