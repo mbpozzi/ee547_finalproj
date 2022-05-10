@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "axios": "^0.27.2",
-    "csv-parser": "^3.0.0",
-    "puppeteer": "^13.7.0"
-  }
-}

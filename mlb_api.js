@@ -112,7 +112,62 @@ class Decorator{
         return((Number(stat).toFixed(3)))
     }
     
+    returnTeams(teams){
+        var rtn_teams = []
+        for(const obj of teams){
+            rtn_teams.push(this.decTeam(obj));
+        }
+        return rtn_teams;
+    }
 
+    decTeam(obj){
+        return{
+            team:           obj.name,
+            league:         obj.league.name,
+            division:       obj.division.name,
+            venue:          obj.venue.name,
+            abbreviation:   obj.abbreviation
+        }
+    }
+    returnLeague(all_teams,league){
+        var league_teams = [];
+        for(const obj of all_teams){
+            if(obj.league == league){
+                league_teams.push(obj);
+            }
+        }
+        //console.log()
+        return league_teams
+    }
+
+    returnDivision(league_teams,division){
+        var div_teams = []
+        for(const obj of league_teams){
+            if(obj.division.includes(division)){
+                div_teams.push(obj)
+            }
+        }
+        return div_teams;
+    }
+
+    returnStatLeaders(stat_obj){
+        let temp = {
+            stat_type:  stat_obj[0].leaderCategory,
+            leaders:    stat_obj[0].leaders
+        }
+        
+        return temp
+    }
+
+    getTeamRecDivision(records){
+        var arr = []
+        for(const obj of records){
+            
+            arr.push(...obj.teamRecords)
+        }
+        console.log(arr)
+        return arr;
+    }
 
 }
 const d = new Decorator();
@@ -144,7 +199,7 @@ class Predictor{
         return result;
     }
     async calcRegr(data){
-        var cof = await this.getCoeff('./coef.csv');
+        var cof = await this.getCoeff('./stats/coef.csv');
         var hitting_vals = Object.values(data.stats.hitting);
         var hitting_cof = Object.values(cof).slice(0,hitting_vals.length)
         var hitting_reg = this.dotProduct(hitting_vals,hitting_cof)
@@ -215,6 +270,32 @@ class Predictor{
 const p = new Predictor;
 
 class MlbApi {
+    getTeams(year,callback){
+        axios.get(`https://statsapi.mlb.com/api/v1/teams?season=${year}&sportIds=1`).then(resp => {
+            callback(null,d.returnTeams(resp.data.teams));
+        }).catch(errors =>{
+            callback(errors);
+        })
+    }
+
+    getLeague(year,league,callback){
+        axios.get(`https://statsapi.mlb.com/api/v1/teams?season=${year}&sportIds=1`).then(resp => {
+            var all_teams = d.returnTeams(resp.data.teams);
+            callback(null,d.returnLeague(all_teams,league));
+        }).catch(errors =>{
+            callback(errors);
+        })
+    }
+
+    getDivision(year,league,division,callback){
+        axios.get(`https://statsapi.mlb.com/api/v1/teams?season=${year}&sportIds=1`).then(resp => {
+            var all_teams = d.returnTeams(resp.data.teams);
+            var league_teams = d.returnLeague(all_teams,league);
+            callback(null,d.returnDivision(league_teams,division));
+        }).catch(errors =>{
+            callback(errors);
+        })
+    }
     getTeamsStats(year, callback) {
         const hitting_call = `https://statsapi.mlb.com/api/v1/teams/stats?group=hitting&stats=season&season=${year}&sportIds=1`;
         const pitching_call =  `https://statsapi.mlb.com/api/v1/teams/stats?group=pitching&stats=season&season=${year}&sportIds=1`
@@ -243,7 +324,6 @@ class MlbApi {
     }
 
     getWorldSeriesPerc(callback){
-        //const csv = './coef.csv';
         var adv_stats = this.getTeamsAdvStats('2022', (err,data) => {
             try{
                 (async () =>{
@@ -260,7 +340,25 @@ class MlbApi {
                 return(err);
             }
         });
-        
+    }
+
+    //group can be hitting or pitching
+    getTeamsStatLeaders(stat,group,callback){
+        axios.get(`https://statsapi.mlb.com/api/v1/teams/stats/leaders?leaderCategories=${stat}&statGroup=${group}`).then(resp => {
+            //console.log(d.returnStatLeaders(resp.data.leagueLeaders))
+            callback(null,d.returnStatLeaders(resp.data.leagueLeaders));
+        }).catch(errors =>{
+            callback(errors);
+        })
+    }
+
+    getTeamsRecords(year,callback){
+        axios.get(`https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=${year}`).then(resp => {
+            //console.log(resp.data)
+            callback(null,d.getTeamRecDivision(resp.data.records));
+        }).catch(errors => {
+            callback(errors);
+        })
     }
 }
 
