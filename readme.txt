@@ -22,3 +22,12 @@ To run this application, clone the repository and then:
 3. run a mongoDB container
 4. run $ nodemon user.js
 5. go to {IP ADDR}:3000/index.html
+
+File Descriptions:
+user.js --- the express app that coordinates the whole interface
+scraper.js --- puppeteer web scraper for advanced statistics
+mlb_api.js --- Axios-based MLB API
+coef.csv --- regression coefficients for WS probabilities
+/public --- HTML files
+/config --- files necessary for application (mongo config, team names and abbreviations)
+package.json --- list of dependencies
