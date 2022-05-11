@@ -36,8 +36,9 @@ catch(err)
   console.log(err);
   process.exit(2);
 }
-
 const mlb = new MlbApi();
+
+
 let mongoDb;
 let teamNames;
 var probs;
@@ -48,10 +49,10 @@ var teams_abb;
     {
         let config = fs.readFileSync('./config/user_mongo.json');
         let teamsJSON = fs.readFileSync('./config/teams.json');
-        let teamsAbb = fs.readFileSync('./config/teams_abb.json')
+        let teamsAbb = fs.readFileSync('./config/teams_abb.json');
         let details = JSON.parse(config);
         teamNames = JSON.parse(teamsJSON);
-        teams_abb = JSON.parse(teamsAbb)
+        teams_abb = JSON.parse(teamsAbb);
         try 
         {
             const URI = `mongodb://${details.host}:${details.port}?useUnifiedTopology=${details.opts.useUnifiedTopology}`;
@@ -59,14 +60,15 @@ var teams_abb;
             const mongoConnect = await MongoClient.connect(URI);
             mongoDb = mongoConnect.db(MONGO_DB);
             
-            // let usernameIndexed = mongoDb.collection(USER_COLLECTION).createIndex({"username": "name"});
-            
             (async ()=> {
                 await mlb.getWorldSeriesPerc((err,data) => {
                     probs = data
                     console.log("Got Probs")
+                    console.log(probs)
                 });
             })();
+            
+           
             app.listen(PORT);
             console.log(`server started, port ${PORT}`);
         }
@@ -182,14 +184,12 @@ class decorator
 const v = new validator();
 const d = new decorator();
 
-
 let teamsArray = [];
 mlb.getTeamsStats('2022', (err, data) =>
 {
     teamsArray = data;
     console.log('Got teams');   
 });
-
 
 
 app.get('/ping', (req, res, next) => {
@@ -215,12 +215,13 @@ app.post('/login', urlEncodedBodyParser, async (req, res, next) => {
         let validLogin = await v.validateLogin(username, password);
         if (validLogin)
         {
+            console.log(req.body);
             res.status(303).redirect(`/user.html?username=${username}`);
             res.end();
         }
         else
         {
-            res.status(303).redirect('login.html');
+            res.status(303).redirect('/login.html');
             res.end();
         }
     }
@@ -237,15 +238,10 @@ app.get('/user/:username', urlEncodedBodyParser, async (req, res, next) =>
 {
     try
     {
-        // check if username exists and user is logged in
-        
         let userData = await mongoDb.collection(USER_COLLECTION).findOne({"username": req.params.username});
         let favoriteTeam = teamsArray.filter(t => t.team == userData.team);
-        let decoratedTeam = d.decorateTeamForUser(favoriteTeam,probs); 
-        //res.writeHead(303, {Location: "user.html"}).json(decoratedTeam);
-        console.log(decoratedTeam)
+        let decoratedTeam = d.decorateTeamForUser(favoriteTeam,probs);  
         res.status(200).json(decoratedTeam);
-        //res.status(303).redirect('user.html').json(decoratedTeam);
         res.end();
         next();
     }
@@ -270,7 +266,7 @@ app.post('/signup', urlEncodedBodyParser, async (req, res, next) => {
         else
         {
             console.log("Signup failed");
-            res.writeHead(200);
+            res.status(303).redirect('login.html');
             res.end();
         }
     }
@@ -319,6 +315,7 @@ app.get('/team', async (req, res, next) => {
 app.post('/user', urlEncodedBodyParser, async (req, res, next) => {
     try
     {
+        console.log(req.body);
         const newTeam = req.body.team;
         const username = req.body.username;
         let updatedTeam = await mongoDb.collection(USER_COLLECTION).updateOne({"username": username}, {$set: {"team": newTeam}});

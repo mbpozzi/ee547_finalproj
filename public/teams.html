@@ -10,9 +10,7 @@
             }
             #teams_list {
                 text-align: center;
-                margin: auto;
-                width: 25%;
-                position: relative;}
+                margin: auto; }
             .team {
                 padding: 10px;
                 border-style: solid;
@@ -28,37 +26,36 @@
             #logout_section {
                 height: 100px;
             }
-            .teams-top{
-                width: 50%;
-            }
+        
         </style>
     </head>
     <body>
-        <div class="float-container" style="text-align: center; padding: 20px;">
-            <div id="title" class="float-child teams-top">
-                2022 Stats for MLB Teams
-            </div> 
-            <div class="float-child teams-top">
-                <form id="login_form" action="/login.html">
-                    <button id="login_button" type="submit" class="btn btn-primary">Login</button>
-                </form>
+        <div class="container-fluid" style="text-align: center; padding: 20px;">
+            <div class="row" style="position: fixed; top: 10px; right: 50px;">
+                <div>
+                    <a href="/index.html" style="font-size:20pt; position: fixed; top: 10px; left: 50px;">Home</a>
+                </div>
+                <div>
+                    <form id="login_form" action="/login.html">
+                        <button id="login_button" type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                </div>
+            </div>
+            <div id="teams_list" class="row" style="position: relative; top: 50px;">
+                <div v-for="team in teams" :key="team.team">
+                    <div class="team-outer">
+                        <div class="team">
+                            <p><b>{{ team.team }}</b></p>
+                            <p>Team Batting Average: {{ team.stats.batting_avg_for }}</p>
+                            <p>Team ERA: {{ team.stats.era_for }}</p>
+                            <p>Runs for: {{ team.stats.runs_for }}</p>
+                            <p>Runs against: {{ team.stats.runs_against }}</p>
+                        </div>
+                    </div>        
+                </div>
             </div>
         </div>
 
-
-        <div id="teams_list" class="float-container" style="display: block;">
-            <div v-for="team in teams" :key="team.team">
-                <div class="team-outer" >
-                    <div class="team">
-                        <p>{{ team.team }}</p>
-                        <p>Team Batting Average: {{ team.stats.batting_avg_for }}</p>
-                        <p>Team ERA: {{ team.stats.era_for }}</p>
-                        <p>Runs for: {{ team.stats.runs_for }}</p>
-                        <p>Runs against: {{ team.stats.runs_against }}</p>
-                    </div>
-                </div>        
-            </div>
-        </div>
 
         
         <script>

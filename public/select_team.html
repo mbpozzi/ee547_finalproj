@@ -8,20 +8,10 @@
                 margin: auto;
                 font-size: 24px;
             }
-            #teams_list {
-                text-align: center;
-                margin: auto;
-                width: 25%;
-                position: relative;}
-            .team {
-                padding: 10px;
-                border-style: solid;
-                border-color: blue;}
-            .team-outer {
-                padding: 10px;
-                align-items: center;
-                align-content: center;
-            }
+     
+            .team-inner {
+                padding: 20px;}
+       
             #title {
                 height: 100px;
             }
@@ -33,58 +23,67 @@
             }
         </style>
         <script>
-            function delay(time) {
-                return new Promise(resolve => setTimeout(resolve, time));
-                }
-            const parameters = new URLSearchParams(window.location.search);
-            delay(100).then(() => {
-                const forms = document.querySelectorAll('.team-inner');
-                for (let i = 0; i < forms.length; i++)
-                {
-                    let teamName = forms[i].children[0].children[0].innerHTML;
-                    forms[i].children[1].children[0][1].form[1].setAttribute('value', teamName);
-                    forms[i].children[1].children[0][1].form[2].setAttribute('value', parameters.get('username'));
-                    
-                    forms[i].children[1].children[0][1].form[1].style.visibility = 'hidden';
-                    forms[i].children[1].children[0][1].form[2].style.visibility = 'hidden';
+            document.addEventListener('DOMContentLoaded', () =>
+            {
+                function delay(time) {
+                    return new Promise(resolve => setTimeout(resolve, time));
+                    }
+                const parameters = new URLSearchParams(window.location.search);
+                delay(25).then(() => {
+                    const forms = document.querySelectorAll('.team-inner');
+                    for (let i = 0; i < forms.length; i++)
+                    {
+                        let teamName = forms[i].children[0].children[0].innerHTML;
+                        forms[i].children[1].children[0].children[1].setAttribute('value', teamName);
+                        forms[i].children[1].children[0].children[2].setAttribute('value', parameters.get('username'));
+                        
+                        forms[i].children[1].children[0].children[1].style.visibility = 'hidden';
+                        forms[i].children[1].children[0].children[2].style.visibility = 'hidden';
+                    }
+                }   
+                );
+            });
+                
 
-                }
-            }   
-            );
-            
         </script>
     </head>
     <body>
-        <div class="float-container" style="text-align: center; padding: 20px;">
-            <div id="title" class="float-child teams-top">
-                2022 Stats for MLB Teams
-            </div> 
-            <div class="float-child teams-top">
-                <form id="logout_form" action="/index.html">
-                    <button id="logout_button" type="submit" class="btn btn-primary">Logout</button>
-                </form>
+        <div class="container-fluid" style="text-align: center; padding: 20px;">
+            <div class="row" style="position: fixed; top: 10px; right: 50px;">
+                <div>
+                    <a href="/index.html" style="font-size:20pt; position: fixed; top: 10px; left: 50px;">Home</a>
+                </div> 
+                <div>
+                    <form id="logout_form" action="/index.html">
+                        <button id="logout_button" type="submit" class="btn btn-primary">Logout</button>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div id="title" style="font-size:20pt; position: relative; top: 50px; text-align: center;">
+                    <b>Select a new favorite MLB Team</b>
+                </div>
+            </div>
+            <div id="teams_list" class="row" style="position: relative; top: 50px; text-align: center;">
+                <div v-for="team in teams" :key="team.team" class="team-inner  col-6 col-md-4 col-lg-3">
+                        <div>
+                            <p style="font-weight: bold; font-size: 14pt;">{{ team.team }}</p>
+                            <p>Runs for: {{ team.stats.runs_for }}</p>
+                            <p>Runs against: {{ team.stats.runs_against }}</p>
+                        </div>
+                        <div> 
+                            <form class="teamchange_form" action="/user" method="post" enctype="application/x-www-form-urlencoded">
+                                <button id="teamchange_button" type="submit" class="btn btn-primary">Make this my team</button>
+                                <input class="signup-hidden" name="team" value="" style="width: 1px; height: 1px;">
+                                <input class="signup-hidden" name="username" value="" style="width: 1px; height: 1px;">
+                            </form>    
+                        </div>
+                </div>
             </div>
         </div>
 
 
-        <div id="teams_list" class="float-container" style="display: block;">
-            <div v-for="team in teams" :key="team.team" class="team-outer">
-                <div class="team-inner">
-                    <div class="team">
-                        <p class="teamname_text">{{ team.team }}</p>
-                        <p>Runs for: {{ team.stats.runs_for }}</p>
-                        <p>Runs against: {{ team.stats.runs_against }}</p>
-                    </div>
-                    <div class="change_team_section"> 
-                        <form class="teamchange_form" action="/user" method="post" enctype="application/x-www-form-urlencoded">
-                            <button id="teamchange_button" type="submit" class="btn btn-primary">Make this my team</button>
-                            <input class="signup-team" name="team" value="">
-                            <input class="signup-team" name="username" value="">
-                        </form>    
-                    </div>
-                </div>    
-            </div>
-        </div>
+        
 
         
         <script>
