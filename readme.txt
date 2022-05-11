@@ -17,7 +17,7 @@ The project is built using Express, Vue, puppetteer, HTML, CSS, javascript and A
 
 To run this application, clone the repository and then:
 
-1. run '$ npm install'
+1. run $ npm install
 2. install mongoDB (https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-windows/#install-mongodb-community-edition)
 3. run a mongoDB container
 4. run $ nodemon user.js
