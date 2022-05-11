@@ -36,7 +36,8 @@ module.exports.scrape = async function(year){
 var scrape_hitting = async function(year) {
    const browser = await puppeteer.launch({})
    const page = await browser.newPage()
-   await page.goto(`https://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=0&type=1&season=${year}&month=0&season1=${year}&ind=0&team=0,ts&rost=0&age=0&filter=&players=0&startdate=${year}-01-01&enddate=${year}-12-31`)
+   var url = `https://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=0&type=1&season=${year}&month=0&season1=${year}&ind=0&team=0,ts&rost=0&age=0&filter=&players=0&startdate=${year}-01-01&enddate=${year}-12-31`;
+   await page.goto(url,{ waitUntil: 'domcontentloaded' })
    var element = await page.waitForSelector("#LeaderBoard1_dg1_ctl00 > tbody")
    var text = await page.evaluate(element => element.innerText, element)
    var table = createTable(text,'hit');

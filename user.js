@@ -37,19 +37,21 @@ catch(err)
   process.exit(2);
 }
 
-
 const mlb = new MlbApi();
 let mongoDb;
 let teamNames;
 var probs;
+var teams_abb;
 ( async () =>
 {
     try 
     {
         let config = fs.readFileSync('./config/user_mongo.json');
         let teamsJSON = fs.readFileSync('./config/teams.json');
+        let teamsAbb = fs.readFileSync('./config/teams_abb.json')
         let details = JSON.parse(config);
         teamNames = JSON.parse(teamsJSON);
+        teams_abb = JSON.parse(teamsAbb)
         try 
         {
             const URI = `mongodb://${details.host}:${details.port}?useUnifiedTopology=${details.opts.useUnifiedTopology}`;
@@ -57,14 +59,14 @@ var probs;
             const mongoConnect = await MongoClient.connect(URI);
             mongoDb = mongoConnect.db(MONGO_DB);
             
+            // let usernameIndexed = mongoDb.collection(USER_COLLECTION).createIndex({"username": "name"});
+            
             (async ()=> {
                 await mlb.getWorldSeriesPerc((err,data) => {
                     probs = data
-                    console.log(probs)
+                    console.log("Got Probs")
                 });
             })();
-            
-            // let usernameIndexed = mongoDb.collection(USER_COLLECTION).createIndex({"username": "name"});
             app.listen(PORT);
             console.log(`server started, port ${PORT}`);
         }
@@ -153,7 +155,7 @@ class decorator
                         }
         return decTeam;
     }
-    decorateTeamForUser(team)
+    decorateTeamForUser(team,probs)
     {
         team = team[0];
         let decTeam = {"team": team.team, 
@@ -166,15 +168,20 @@ class decorator
                     "era_pitching": team.stats.pitching.era,
                     "strikeouts_pitching": team.stats.pitching.strikeOuts,
                     "walks_pitching": team.stats.pitching.baseOnBalls,
-                    "runs_against": team.stats.pitching.runs
+                    "runs_against": team.stats.pitching.runs,
+                    "World_Series_Prob": this.mapTeamProbs(team.team,probs)   
                     }
                 }
         return decTeam;
     }
+
+    mapTeamProbs(team,probs){
+        return(probs[teams_abb[team][0]][teams_abb[team][1]])
+    }
 }
 const v = new validator();
 const d = new decorator();
-//const mlb = new MlbApi();
+
 
 let teamsArray = [];
 mlb.getTeamsStats('2022', (err, data) =>
@@ -182,14 +189,9 @@ mlb.getTeamsStats('2022', (err, data) =>
     teamsArray = data;
     console.log('Got teams');   
 });
-/*
-let predictions = [];
-mlb.getWorldSeriesPerc((err, data) => {
-    predictions = [];
-    console.log('got predictions');
-    console.log(predictions);
-})
-*/
+
+
+
 app.get('/ping', (req, res, next) => {
     try{
         console.log('ping');
@@ -239,8 +241,9 @@ app.get('/user/:username', urlEncodedBodyParser, async (req, res, next) =>
         
         let userData = await mongoDb.collection(USER_COLLECTION).findOne({"username": req.params.username});
         let favoriteTeam = teamsArray.filter(t => t.team == userData.team);
-        let decoratedTeam = d.decorateTeamForUser(favoriteTeam); 
+        let decoratedTeam = d.decorateTeamForUser(favoriteTeam,probs); 
         //res.writeHead(303, {Location: "user.html"}).json(decoratedTeam);
+        console.log(decoratedTeam)
         res.status(200).json(decoratedTeam);
         //res.status(303).redirect('user.html').json(decoratedTeam);
         res.end();
